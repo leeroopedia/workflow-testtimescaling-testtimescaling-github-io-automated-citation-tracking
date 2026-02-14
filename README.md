@@ -78,9 +78,10 @@ workflow-testtimescaling-testtimescaling-github-io-automated-citation-tracking/
 │   ├── test_citation_fetcher.py        # Unit tests for API fetching
 │   ├── test_badge_generator.py         # Unit tests for badge generation
 │   └── test_paper_config.py            # Unit tests for config loading
+├── docs/
+│   └── update_citations.yml            # GitHub Actions workflow definition (see setup)
 └── .github/
-    └── workflows/
-        └── update_citations.yml        # GitHub Actions workflow (daily cron)
+    └── workflows/                      # Copy workflow here to enable automation
 ```
 
 **Why this structure?** This is a CI/CD automation pipeline with a clear data flow: config in → API fetch → badge output. The code is split by responsibility: `config/` holds the paper list that drives the pipeline, `src/` contains the three logical stages (load config, fetch citations, generate badge), `scripts/` provides the CLI entry point, and `.github/workflows/` defines the automation schedule. This separation makes it straightforward to add papers, swap the API source, or change the badge format independently.
@@ -116,9 +117,22 @@ Edit `config/papers.json` to add or remove papers:
 | `--color` | Badge color (any Shields.io color name) | `blue` |
 | `--timeout` | HTTP request timeout in seconds | `10` |
 
-### GitHub Actions Schedule
+### GitHub Actions Setup
 
-The workflow in `.github/workflows/update_citations.yml` runs on a daily cron schedule (`0 0 * * *` — midnight UTC). You can also trigger it manually from the Actions tab using the `workflow_dispatch` event.
+The workflow definition is provided in `docs/update_citations.yml`. To enable automated daily updates:
+
+```bash
+# Copy the workflow into the GitHub Actions directory
+mkdir -p .github/workflows
+cp docs/update_citations.yml .github/workflows/update_citations.yml
+git add .github/workflows/update_citations.yml
+git commit -m "Enable GitHub Actions citation tracking workflow"
+git push
+```
+
+> **Note:** Pushing workflow files to GitHub requires a PAT with the `workflow` scope, or use the GitHub web UI to create the file directly.
+
+The workflow runs on a daily cron schedule (`0 0 * * *` — midnight UTC). You can also trigger it manually from the Actions tab using the `workflow_dispatch` event.
 
 ---
 
